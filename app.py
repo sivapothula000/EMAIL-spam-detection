@@ -1,53 +1,57 @@
-import pythoncom
-import pyttsx3  # assuming you're using this for text-to-speech
+import platform
 import streamlit as st
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
-from win32com.client import Dispatch
+from gtts import gTTS
+import os
 
-
+# Load model and vectorizer
+model = pickle.load(open('spam.pkl', 'rb'))
+cv = pickle.load(open('vectorizer.pkl', 'rb'))
 
 def speak(text):
-    pythoncom.CoInitialize()  # Initialize COM
-    speaker = Dispatch("SAPI.SpVoice")
-    speaker.Speak(text)
-
-
-
-model = pickle.load(open('spam.pkl','rb'))
-cv=pickle.load(open('vectorizer.pkl','rb'))
-
+    """Generates and plays speech audio in Streamlit."""
+    tts = gTTS(text=text, lang='en')
+    tts.save("output.mp3")
+    audio_file = open("output.mp3", "rb")
+    st.audio(audio_file.read(), format="audio/mp3")
 
 def main():
-	st.markdown(
-	"""
-	<style>
-	.stApp {
-		background-color: skyblue;
-	}
-	</style>
-	""",
-	unsafe_allow_html=True
-)
-	st.title(" Email (or) SMS Spam Detection Application")
-	st.write("Build with Streamlit & Python")
-	activites=["Classification"]
-	choices=st.sidebar.selectbox("Select Activities",activites)
-	if choices=="Classification":
-		st.subheader("Classification")
-		msg=st.text_input("Enter a text")
-		if st.button("Process"):
-			print(msg)
-			print(type(msg))
-			data=[msg]
-			print(data)
-			vec=cv.transform(data).toarray()
-			result=model.predict(vec)
-			if result[0]==0:
-				st.success("This is Not A Spam  Jede prashanth")
-				speak("This is Not A Spam  Jedey prashanth")
-			else:
-				st.error("This is A Spam  Jede prashanth")
-				speak("This is A Spam  Jedey prashanth")
-main()
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: skyblue;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.title("Email / SMS Spam Detection Application")
+    st.write("Built with Streamlit & Python")
+
+    activities = ["Classification"]
+    choice = st.sidebar.selectbox("Select Activity", activities)
+
+    if choice == "Classification":
+        st.subheader("Enter your message below")
+        msg = st.text_input("Enter a text")
+
+        if st.button("Process"):
+            data = [msg]
+            vec = cv.transform(data).toarray()
+            result = model.predict(vec)
+
+            if result[0] == 0:
+                output = "This is Not a Spam, Jede Prashanth"
+                st.success(output)
+                speak(output)
+            else:
+                output = "This is a Spam, Jede Prashanth"
+                st.error(output)
+                speak(output)
+
+if __name__ == "__main__":
+    main()
