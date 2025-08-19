@@ -45,13 +45,14 @@ def main():
             result = model.predict(vec)
 
             if result[0] == 0:
-                output = "This is Not a Spam, Jede Prashanth"
+                output = "This is Not a Spam, siva anand"
                 st.success(output)
                 speak(output)
             else:
-                output = "This is a Spam, Jede Prashanth"
+                output = "This is a Spam, siva anand"
                 st.error(output)
                 speak(output)
 
 if __name__ == "__main__":
     main()
+
